@@ -1,26 +1,33 @@
 import { Injectable } from '@nestjs/common';
+import { FindOptionsWhere } from 'typeorm';
 import { CreateTransactionDto } from './dtos/create-transaction.dto';
 import { UpdateTransactionDto } from './dtos/update-transaction.dto';
+import { Transaction } from './entities/transaction.entity';
+import { TransactionRepository } from './repositories/transaction.repository';
 
 @Injectable()
 export class TransactionService {
+	constructor(private readonly repository: TransactionRepository) {}
+
 	create(createTransactionDto: CreateTransactionDto) {
-		return 'This action adds a new transaction';
+		return this.repository.create(createTransactionDto);
 	}
 
 	findAll() {
-		return `This action returns all transactions`;
+		return this.repository.find();
 	}
 
 	findOne(id: number) {
-		return `This action returns a #${id} transaction`;
+		return this.repository.findOne({
+			where: id as unknown as FindOptionsWhere<Transaction>,
+		});
 	}
 
 	update(id: number, updateTransactionDto: UpdateTransactionDto) {
-		return `This action updates a #${id} transaction`;
+		return this.repository.update(id, updateTransactionDto);
 	}
 
 	remove(id: number) {
-		return `This action removes a #${id} transaction`;
+		return this.repository.delete(id);
 	}
 }
