@@ -1,11 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
+import { BaseEntity } from '../../../core/base.entity';
 import { UserType } from '../interfaces/user-type.enum';
 
 @Entity({ name: 'users' })
-export class User {
-	@PrimaryGeneratedColumn({ type: 'integer' })
-	id: number;
-
+export class User extends BaseEntity {
 	@Column()
 	firstName: string;
 
