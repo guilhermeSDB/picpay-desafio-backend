@@ -19,7 +19,7 @@ export class User extends BaseEntity {
 	@Column()
 	password: string;
 
-	@Column({ type: 'bigint' })
+	@Column()
 	balance: number;
 
 	@Column({

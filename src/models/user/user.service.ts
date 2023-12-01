@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { FindOptionsWhere } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -25,12 +24,14 @@ export class UserService {
 
 	findOne(id: number): Promise<User> {
 		return this.repository.findOne({
-			where: id as unknown as FindOptionsWhere<User>,
+			where: {
+				id,
+			},
 		});
 	}
 
-	update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-		this.repository.update(id, updateUserDto);
+	async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+		await this.repository.update(id, updateUserDto);
 		return this.findOne(id);
 	}
 
