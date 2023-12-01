@@ -1,17 +1,9 @@
-import {
-	Column,
-	Entity,
-	JoinColumn,
-	ManyToOne,
-	PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { BaseEntity } from '../../../core/base.entity';
 import { User } from '../../user/entities/user.entity';
 
 @Entity({ name: 'transactions' })
-export class Transaction {
-	@PrimaryGeneratedColumn({ type: 'integer' })
-	id: number;
-
+export class Transaction extends BaseEntity {
 	@Column({ type: 'int' })
 	amount: number;
 
@@ -22,7 +14,4 @@ export class Transaction {
 	@ManyToOne(() => User, (user) => user.id)
 	@JoinColumn({ name: 'receiver_id' })
 	receiver: User;
-
-	@Column({ type: 'datetime' })
-	timestamp: Date;
 }

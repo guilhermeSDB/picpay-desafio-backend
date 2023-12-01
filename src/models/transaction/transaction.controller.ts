@@ -7,11 +7,13 @@ import {
 	Patch,
 	Post,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CreateTransactionDto } from './dtos/create-transaction.dto';
 import { UpdateTransactionDto } from './dtos/update-transaction.dto';
 import { TransactionService } from './transaction.service';
 
-@Controller('transactions')
+@ApiTags('Transaction')
+@Controller('transaction')
 export class TransactionController {
 	constructor(private readonly transactionService: TransactionService) {}
 

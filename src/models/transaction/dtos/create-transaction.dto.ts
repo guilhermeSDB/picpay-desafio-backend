@@ -1,1 +1,7 @@
-export class CreateTransactionDto {}
+export class CreateTransactionDto {
+	amount: number;
+
+	senderId: number;
+
+	receiverId: number;
+}
