@@ -11,6 +11,6 @@ services:
       MYSQL_PASSWORD: admin
       MYSQL_ROOT_PASSWORD: admin
     ports:
-      - '3007:3306'
+      - '3008:3306'
     expose:
-      - '3007'
+      - '3008'
