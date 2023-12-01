@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import { DataSource, FindOptionsWhere } from 'typeorm';
+import { NotificationService } from '../notification/notification.service';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { CreateTransactionDto } from './dtos/create-transaction.dto';
@@ -14,21 +15,23 @@ import { TransactionRepository } from './repositories/transaction.repository';
 export class TransactionService {
 	constructor(
 		private readonly repository: TransactionRepository,
+		private readonly notificationService: NotificationService,
 		private readonly userService: UserService,
 		private readonly httpService: HttpService,
 		private dataSource: DataSource,
 	) {}
 
-	async create(transaction: CreateTransactionDto): Promise<Transaction> {
-		const sender = await this.userService.findOne(transaction.senderId);
-		const receiver = await this.userService.findOne(transaction.receiverId);
+	async create({
+		amount: value,
+		receiverId,
+		senderId,
+	}: CreateTransactionDto): Promise<Transaction> {
+		const sender = await this.userService.findOne(senderId);
+		const receiver = await this.userService.findOne(receiverId);
 
-		this.userService.validateTransaction(sender, transaction.amount);
+		this.userService.validateTransaction(sender, value);
 
-		const isAuthorized = await this.authorizeTransaction(
-			sender,
-			transaction.amount,
-		);
+		const isAuthorized = await this.authorizeTransaction(sender, value);
 
 		if (!isAuthorized) {
 			throw new HttpException(
@@ -37,14 +40,30 @@ export class TransactionService {
 			);
 		}
 
-		transaction.amount = sender.balance - transaction.amount;
-		receiver.balance = receiver.balance + transaction.amount;
+		const transactionEntity: Partial<Transaction> = {
+			amount: value,
+			receiver: receiver,
+			sender: sender,
+		};
+		sender.balance = Number(sender.balance) - Number(value);
+		receiver.balance = Number(receiver.balance) + Number(value);
 
 		const result = await this.dataSource.transaction(async (manager) => {
+			const entity = manager.create(Transaction, transactionEntity);
 			manager.update(User, sender.id, sender);
 			manager.update(User, receiver.id, receiver);
-			return manager.save(Transaction, transaction);
+			return manager.save(Transaction, entity);
 		});
+
+		this.notificationService.sendNotification(
+			sender,
+			'Transação realizada com sucesso',
+		);
+
+		this.notificationService.sendNotification(
+			receiver,
+			'Transação recebida com sucesso',
+		);
 
 		return result;
 	}
@@ -63,11 +82,11 @@ export class TransactionService {
 		});
 	}
 
-	update(
+	async update(
 		id: number,
 		updateTransactionDto: UpdateTransactionDto,
 	): Promise<Transaction> {
-		this.repository.update(id, updateTransactionDto);
+		await this.repository.update(id, updateTransactionDto);
 		return this.findOne(id);
 	}
 

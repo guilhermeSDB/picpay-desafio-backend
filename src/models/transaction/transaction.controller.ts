@@ -13,7 +13,7 @@ import { UpdateTransactionDto } from './dtos/update-transaction.dto';
 import { TransactionService } from './transaction.service';
 
 @ApiTags('Transaction')
-@Controller('transaction')
+@Controller('transactions')
 export class TransactionController {
 	constructor(private readonly transactionService: TransactionService) {}
 
